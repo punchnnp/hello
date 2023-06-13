@@ -77,7 +77,8 @@ func DeleteBook(c *fiber.Ctx) error {
 	var id, _ = c.ParamsInt("Id")
 	for i := 0; i < len(Book); i++ {
 		if Book[i].Id == id {
-			return c.SendString("Delete book")
+			Book = append(Book[:i], Book[i+1:]...)
+			return c.JSON(Book)
 		}
 	}
 	return c.SendString("This book ID is not exist")
