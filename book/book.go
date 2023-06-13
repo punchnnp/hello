@@ -2,6 +2,7 @@ package book
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -44,17 +45,19 @@ func GetBook(c *fiber.Ctx) error {
 
 func AddBook(c *fiber.Ctx) error {
 	var tempBook []Books
-	var AllBook []Books
 	var BookJsonInput = `[
 		{
 			"id": 3,
-			"book_name": "this is a book",
-			"description": "something that you want to read"}
+			"book_name": "this is thrid book",
+			"description": "something that you want to eat"
 		}
 	]`
-	json.Unmarshal([]byte(BookJsonInput), &tempBook)
-	AllBook = append(Book, tempBook...)
-	return c.JSON(AllBook)
+	err := json.Unmarshal([]byte(BookJsonInput), &tempBook)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	Book = append(Book, tempBook...)
+	return c.JSON(Book)
 }
 
 func UpdateBook(c *fiber.Ctx) error {
