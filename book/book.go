@@ -23,22 +23,25 @@ var Book []Books
 var db, _ = sql.Open("mysql", database.Dns("book"))
 
 func GetBooks(c *fiber.Ctx) error {
-	var book Books
-	// db.Query("SELECT * FROM books", &Book)
+	var book []Books
 	rows, err := db.Query("SELECT * FROM books")
 	if err != nil {
 		fmt.Print(err.Error())
 	} else {
 		for rows.Next() {
-			err2 := rows.Scan(&book.Id, &book.Book_name, &book.Description)
+			var id int
+			var name string
+			var desc string
+			err2 := rows.Scan(&id, &name, &desc)
 			if err2 != nil {
 				return err2
+			} else {
+				books := Books{id, name, desc}
+				book = append(book, books)
 			}
 		}
 	}
-	fmt.Println(book.Book_name)
-	fmt.Println(book.Description)
-	return c.JSON(Book)
+	return c.JSON(book)
 }
 
 func GetBook(c *fiber.Ctx) error {
@@ -46,44 +49,57 @@ func GetBook(c *fiber.Ctx) error {
 	var id, _ = c.ParamsInt("id")
 	err := db.QueryRow("SELECT * FROM books where book_id = ?", id).Scan(&book.Id, &book.Book_name, &book.Description)
 	if err != nil {
-		panic(err.Error())
+		return c.SendString("This book ID is not exist")
 	}
 	return c.JSON(book)
 }
 
 func AddBook(c *fiber.Ctx) error {
+	var book Books
 	query := "INSERT INTO books(book_name, book_desc) VALUES (?, ?)"
 	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelfunc()
 
-	insertResult, err := db.ExecContext(ctx, query, "John", "Doe")
+	result, err := db.ExecContext(ctx, query, "John", "Doe")
 	if err != nil {
-		fmt.Printf("impossible insert: %s", err)
+		return c.SendString("Unable to insert new book")
 	}
 
-	id, err := insertResult.LastInsertId()
+	id, err := result.LastInsertId()
 	if err != nil {
-		fmt.Printf("impossible to retrieve last inserted id: %s", err)
+		return c.SendString("Unable to get last insert ID")
 	}
-	fmt.Printf("inserted id: %d", id)
-	return c.JSON(insertResult)
+	fmt.Printf("ID: %d", id)
+
+	err2 := db.QueryRow("SELECT * FROM books where book_id = ?", id).Scan(&book.Id, &book.Book_name, &book.Description)
+	if err2 != nil {
+		return c.SendString("This book ID is not exist")
+	}
+
+	return c.JSON(book)
 }
 
 func UpdateBook(c *fiber.Ctx) error {
+	var book Books
 	var id, _ = c.ParamsInt("id")
-	result, err := db.Exec("UPDATE books SET book_name = ?, book_desc = ? where book_id = ?", "name change", "desc change", id)
+	_, err := db.Exec("UPDATE books SET book_name = ?, book_desc = ? where book_id = ?", "name change", "desc change", id)
 	if err != nil {
 		return err
 	}
-	fmt.Print(result)
-	return c.JSON(result)
+
+	err2 := db.QueryRow("SELECT * FROM books where book_id = ?", id).Scan(&book.Id, &book.Book_name, &book.Description)
+	if err2 != nil {
+		return c.SendString("This book ID is not exist")
+	}
+
+	return c.JSON(book)
 }
 
 func DeleteBook(c *fiber.Ctx) error {
 	var id, _ = c.ParamsInt("Id")
 	_, err := db.Exec("DELETE FROM books where book_id = ?", id)
 	if err != nil {
-		fmt.Print(err.Error())
+		return c.SendString("This book ID is not exist")
 	}
 	return c.SendString("This book ID is delete")
 }
