@@ -23,35 +23,28 @@ var Book []Books
 var db, _ = sql.Open("mysql", database.Dns("book"))
 
 func GetBooks(c *fiber.Ctx) error {
-	// var book Books
-	db.Query("SELECT * FROM books", &Book)
-	// rows, err := db.Query("select * from books")
-	// if err != nil {
-	// 	fmt.Print(err.Error())
-	// } else {
-	// 	var result []Books
-	// 	for rows.Next() {
-	// 		var id int
-	// 		var name string
-	// 		var desc string
-	// 		err2 := rows.Scan(&id, &name, &desc)
-	// 		if err2 != nil {
-	// 			return err2
-	// 		} else {
-	// 			allBook := Books{id, name, desc}
-	// 			result = append(result, allBook)
-	// 		}
-	// 	}
-	// }
-	// fmt.Println(book.Book_name)
-	// fmt.Println(book.Description)
+	var book Books
+	// db.Query("SELECT * FROM books", &Book)
+	rows, err := db.Query("SELECT * FROM books")
+	if err != nil {
+		fmt.Print(err.Error())
+	} else {
+		for rows.Next() {
+			err2 := rows.Scan(&book.Id, &book.Book_name, &book.Description)
+			if err2 != nil {
+				return err2
+			}
+		}
+	}
+	fmt.Println(book.Book_name)
+	fmt.Println(book.Description)
 	return c.JSON(Book)
 }
 
 func GetBook(c *fiber.Ctx) error {
 	var book Books
 	var id, _ = c.ParamsInt("id")
-	err := db.QueryRow("SELECT * FROM tags where id = ?", id).Scan(&book.Id, &book.Book_name, &book.Description)
+	err := db.QueryRow("SELECT * FROM books where book_id = ?", id).Scan(&book.Id, &book.Book_name, &book.Description)
 	if err != nil {
 		panic(err.Error())
 	}
