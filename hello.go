@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v2"
-
 	"hello/book"
+	"hello/database"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func setupRoutes(app *fiber.App) {
@@ -21,6 +22,8 @@ func setupRoutes(app *fiber.App) {
 func main() {
 	app := fiber.New()
 	setupRoutes(app)
+
+	database.ConnectDB()
 
 	app.Listen(":3000")
 }
