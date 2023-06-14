@@ -1,9 +1,14 @@
 package book
 
 import (
-	"encoding/json"
+	"context"
+	"database/sql"
 	"fmt"
+	"hello/database"
 
+	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -13,73 +18,79 @@ type Books struct {
 	Description string
 }
 
-var BookJson = `[
-	{
-		"id": 1,
-		"book_name": "this is a book",
-		"description": "something that you want to read"},
-	{
-		"id": 2,
-		"book_name": "second book",
-		"description": "second book is about the cook"
-	}
-]`
-
 var Book []Books
 
-var AllBook = json.Unmarshal([]byte(BookJson), &Book)
+var db, _ = sql.Open("mysql", database.Dns("book"))
 
 func GetBooks(c *fiber.Ctx) error {
+	// var book Books
+	db.Query("SELECT * FROM books", &Book)
+	// rows, err := db.Query("select * from books")
+	// if err != nil {
+	// 	fmt.Print(err.Error())
+	// } else {
+	// 	var result []Books
+	// 	for rows.Next() {
+	// 		var id int
+	// 		var name string
+	// 		var desc string
+	// 		err2 := rows.Scan(&id, &name, &desc)
+	// 		if err2 != nil {
+	// 			return err2
+	// 		} else {
+	// 			allBook := Books{id, name, desc}
+	// 			result = append(result, allBook)
+	// 		}
+	// 	}
+	// }
+	// fmt.Println(book.Book_name)
+	// fmt.Println(book.Description)
 	return c.JSON(Book)
 }
 
 func GetBook(c *fiber.Ctx) error {
+	var book Books
 	var id, _ = c.ParamsInt("id")
-	for i := 0; i < len(Book); i++ {
-		if Book[i].Id == id {
-			return c.JSON(Book[i])
-		}
+	err := db.QueryRow("SELECT * FROM tags where id = ?", id).Scan(&book.Id, &book.Book_name, &book.Description)
+	if err != nil {
+		panic(err.Error())
 	}
-	return c.SendString("No book found")
+	return c.JSON(book)
 }
 
 func AddBook(c *fiber.Ctx) error {
-	var tempBook []Books
-	var BookJsonInput = `[
-		{
-			"id": 3,
-			"book_name": "this is thrid book",
-			"description": "something that you want to eat"
-		}
-	]`
-	err := json.Unmarshal([]byte(BookJsonInput), &tempBook)
+	query := "INSERT INTO books(book_name, book_desc) VALUES (?, ?)"
+	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelfunc()
+
+	insertResult, err := db.ExecContext(ctx, query, "John", "Doe")
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Printf("impossible insert: %s", err)
 	}
-	Book = append(Book, tempBook...)
-	return c.JSON(Book)
+
+	id, err := insertResult.LastInsertId()
+	if err != nil {
+		fmt.Printf("impossible to retrieve last inserted id: %s", err)
+	}
+	fmt.Printf("inserted id: %d", id)
+	return c.JSON(insertResult)
 }
 
 func UpdateBook(c *fiber.Ctx) error {
 	var id, _ = c.ParamsInt("id")
-	for i := 0; i < len(Book); i++ {
-		if Book[i].Id == id {
-			Book[i].Book_name = "Change name"
-			Book[i].Description = "New description"
-			json.Marshal(Book)
-			return c.JSON(Book)
-		}
+	result, err := db.Exec("UPDATE books SET book_name = ?, book_desc = ? where book_id = ?", "name change", "desc change", id)
+	if err != nil {
+		return err
 	}
-	return c.SendString("This book ID is not exist")
+	fmt.Print(result)
+	return c.JSON(result)
 }
 
 func DeleteBook(c *fiber.Ctx) error {
 	var id, _ = c.ParamsInt("Id")
-	for i := 0; i < len(Book); i++ {
-		if Book[i].Id == id {
-			Book = append(Book[:i], Book[i+1:]...)
-			return c.JSON(Book)
-		}
+	_, err := db.Exec("DELETE FROM books where book_id = ?", id)
+	if err != nil {
+		fmt.Print(err.Error())
 	}
-	return c.SendString("This book ID is not exist")
+	return c.SendString("This book ID is delete")
 }

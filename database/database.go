@@ -16,12 +16,12 @@ const (
 	dbname   = "book"
 )
 
-func dns(dbName string) string {
+func Dns(dbName string) string {
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s", username, password, hostname, dbName)
 }
 
 func ConnectDB() {
-	db, err := sql.Open("mysql", dns(""))
+	db, err := sql.Open("mysql", Dns(""))
 	if err != nil {
 		fmt.Printf("Error %s when opening DB\n", err)
 		return
@@ -46,7 +46,7 @@ func ConnectDB() {
 	fmt.Printf("rows affected %d\n", no)
 
 	db.Close()
-	db, err = sql.Open("mysql", dns(dbname))
+	db, err = sql.Open("mysql", Dns(dbname))
 	if err != nil {
 		fmt.Printf("Error %s when opening DB", err)
 		return
@@ -67,11 +67,12 @@ func ConnectDB() {
 	}
 	fmt.Printf("Connected to DB %s successfully\n", dbname)
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS books (id int NOT NULL AUTO_INCREMENT PRIMARY KEY, name varchar(255) NOT NULL, desc text)")
+	query := `CREATE TABLE IF NOT EXISTS books(book_id int primary key auto_increment, book_name varchar(255) NOT NULL, book_desc text)`
+
+	_, err = db.ExecContext(ctx, query)
 	if err != nil {
 		fmt.Printf("Error %s when create table", err)
 		return
 	}
-	fmt.Printf("Create table successfully")
 
 }
