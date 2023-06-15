@@ -44,13 +44,20 @@ func GetBooks(c *fiber.Ctx) error {
 	return c.JSON(book)
 }
 
+func GetRow(id int) (int, string, string) {
+	// var c *fiber.Ctx
+	var book Books
+	err := db.QueryRow("SELECT * FROM books where book_id = ?", id).Scan(&book.Id, &book.Book_name, &book.Description)
+	if err != nil {
+		return 0, "", "This book ID is not exist"
+	}
+	return book.Id, book.Book_name, book.Description
+}
+
 func GetBook(c *fiber.Ctx) error {
 	var book Books
 	var id, _ = c.ParamsInt("id")
-	err := db.QueryRow("SELECT * FROM books where book_id = ?", id).Scan(&book.Id, &book.Book_name, &book.Description)
-	if err != nil {
-		return c.SendString("This book ID is not exist")
-	}
+	book.Id, book.Book_name, book.Description = GetRow(int(id))
 	return c.JSON(book)
 }
 
@@ -69,13 +76,8 @@ func AddBook(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendString("Unable to get last insert ID")
 	}
-	fmt.Printf("ID: %d", id)
 
-	err2 := db.QueryRow("SELECT * FROM books where book_id = ?", id).Scan(&book.Id, &book.Book_name, &book.Description)
-	if err2 != nil {
-		return c.SendString("This book ID is not exist")
-	}
-
+	book.Id, book.Book_name, book.Description = GetRow(int(id))
 	return c.JSON(book)
 }
 
@@ -87,11 +89,7 @@ func UpdateBook(c *fiber.Ctx) error {
 		return err
 	}
 
-	err2 := db.QueryRow("SELECT * FROM books where book_id = ?", id).Scan(&book.Id, &book.Book_name, &book.Description)
-	if err2 != nil {
-		return c.SendString("This book ID is not exist")
-	}
-
+	book.Id, book.Book_name, book.Description = GetRow(int(id))
 	return c.JSON(book)
 }
 
