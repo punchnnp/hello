@@ -12,7 +12,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
-	// "github.com/spf13/viper"
+	"github.com/spf13/viper"
 )
 
 // func setupRoutes(app *fiber.App, h bookHandler) {
@@ -27,15 +27,8 @@ import (
 // 	app.Delete("/api/book/:id", book.DeleteBook)
 // }
 
-// func initConfig() {
-// 	viper.SetConfigName("config")
-// 	viper.SetConfigType("yaml")
-// 	viper.AddConfigPath(".")
-// 	fmt.Println(viper.GetString("db.driver"))
-// }
-
 func main() {
-	// initConfig()
+	initConfig()
 	// dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v",
 	// 	viper.GetString("db.username"),
 	// 	viper.GetString("db.password"),
@@ -66,11 +59,18 @@ func main() {
 
 	// setupRoutes(app, bookHandler)
 
-	books, err := bookService.GetBookById(2)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(books)
+	// books, err := bookService.GetBookById(2)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(books)
 
 	app.Listen(":3000")
+}
+
+func initConfig() {
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	fmt.Printf("Driver: %s", viper.GetString("db.driver"))
 }
