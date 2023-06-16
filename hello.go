@@ -20,9 +20,10 @@ func main() {
 
 	app := fiber.New()
 
-	db := initDB()
-	bookRepository := repository.NewBookRepositoryDB(db)
-	bookService := service.NewBookService(bookRepository)
+	// db := initDB()
+	// bookRepository := repository.NewBookRepositoryDB(db)
+	bookRepositoryMock := repository.NewBookRepositoryMock()
+	bookService := service.NewBookService(bookRepositoryMock)
 	bookHandler := handler.NewBookHandler(bookService)
 
 	app.Get("/api/book", bookHandler.GetAllBooks)
