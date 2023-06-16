@@ -20,7 +20,7 @@ func (h bookHandler) GetAllBooks(c *fiber.Ctx) error {
 	books, err := h.bookService.GetAllBooks()
 	if err != nil {
 		log.Println(err)
-		return c.SendString("This book ID is not exist")
+		return c.SendString(err.Error())
 	}
 	return c.JSON(books)
 }
@@ -30,7 +30,7 @@ func (h bookHandler) GetBookById(c *fiber.Ctx) error {
 	book, err := h.bookService.GetBookById(id)
 	if err != nil {
 		log.Println(err)
-		return c.SendString("This book ID is not exist")
+		return c.SendString(err.Error())
 	}
 	return c.JSON(book)
 }
@@ -39,7 +39,7 @@ func (h bookHandler) AddNewBook(c *fiber.Ctx) error {
 	book, err := h.bookService.AddNewBook()
 	if err != nil {
 		log.Println(err)
-		return c.SendString("This book ID is not exist")
+		return c.SendString(err.Error())
 	}
 	return c.JSON(book)
 }
@@ -49,7 +49,7 @@ func (h bookHandler) UpdateBook(c *fiber.Ctx) error {
 	book, err := h.bookService.UpdateBook(id)
 	if err != nil {
 		log.Println(err)
-		return c.SendString("This book ID is not exist")
+		return c.SendString(err.Error())
 	}
 	return c.JSON(book)
 }
@@ -59,7 +59,7 @@ func (h bookHandler) DeleteBook(c *fiber.Ctx) error {
 	book, err := h.bookService.DeleteBook(int(id))
 	if err != nil {
 		log.Println(err)
-		return c.SendString("This book ID is not exist")
+		return c.SendString(err.Error())
 	}
-	return c.JSON(book)
+	return c.SendString(book)
 }

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"hello/repository"
 	"log"
 )
@@ -36,7 +37,7 @@ func (s bookService) GetBookById(id int) (*BookResponse, error) {
 	book, err := s.bookRepo.GetById(id)
 	if err != nil {
 		log.Println(err)
-		return nil, err
+		return nil, errors.New("this book id is not exist")
 	}
 
 	result := BookResponse{
@@ -52,7 +53,7 @@ func (s bookService) AddNewBook() (*BookResponse, error) {
 	book, err := s.bookRepo.AddBook()
 	if err != nil {
 		log.Println(err)
-		return nil, err
+		return nil, errors.New("cannot add new book")
 	}
 	result := BookResponse{
 		BookID:      book.BookID,
@@ -67,6 +68,7 @@ func (s bookService) UpdateBook(id int) (*BookResponse, error) {
 	book, err := s.bookRepo.UpdateBook(id)
 	if err != nil {
 		log.Println(err)
+		return nil, errors.New("this book id is not exist")
 	}
 
 	result := BookResponse{
@@ -79,10 +81,11 @@ func (s bookService) UpdateBook(id int) (*BookResponse, error) {
 }
 
 func (s bookService) DeleteBook(id int) (string, error) {
-	book, err := s.bookRepo.DeleteBook(id)
+	_, err := s.bookRepo.DeleteBook(id)
 	if err != nil {
 		log.Println(err)
+		return "this book id is not exist", errors.New("this book id is not exist")
 	}
 
-	return book, nil
+	return "this book ID is deleted", nil
 }

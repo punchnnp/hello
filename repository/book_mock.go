@@ -15,7 +15,10 @@ func NewBookRepositoryMock() *bookRepositoryMock {
 }
 
 func (m *bookRepositoryMock) GetAll() ([]Book, error) {
-	return m.books, nil
+	if len(m.books) != 0 {
+		return m.books, nil
+	}
+	return nil, errors.New("there is no book")
 }
 
 func (m *bookRepositoryMock) GetById(id int) (*Book, error) {
@@ -55,5 +58,5 @@ func (m *bookRepositoryMock) DeleteBook(id int) (string, error) {
 			return "this book ID is deleted", nil
 		}
 	}
-	return "This book is not exist", errors.New("this book is not exist")
+	return "this book is not exist", errors.New("this book is not exist")
 }
