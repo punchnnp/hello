@@ -15,18 +15,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// func setupRoutes(app *fiber.App) {
-// 	app.Get("/", func(c *fiber.Ctx) error {
-// 		return c.SendString("Hello, World!")
-// 	})
-
-// 	app.Get("/api/book", BookHandler.GetAll)
-// 	app.Get("/api/book/:id", book.GetBook)
-// 	app.Post("/api/book", book.AddBook)
-// 	app.Post("/api/book/:id", book.UpdateBook)
-// 	app.Delete("/api/book/:id", book.DeleteBook)
-// }
-
 func main() {
 	initConfig()
 
@@ -37,7 +25,6 @@ func main() {
 	bookService := service.NewBookService(bookRepository)
 	bookHandler := handler.NewBookHandler(bookService)
 
-	// setupRoutes(app, bookHandler)
 	app.Get("/api/book", bookHandler.GetAllBooks)
 	app.Get("/api/book/:id", bookHandler.GetBookById)
 	app.Post("/api/book", bookHandler.AddNewBook)
