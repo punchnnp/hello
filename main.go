@@ -20,8 +20,9 @@ func main() {
 
 	app := fiber.New()
 
-	// db := initDB()
-	// bookRepository := repository.NewBookRepositoryDB(db)
+	db := initDB()
+	bookRepository := repository.NewBookRepositoryDB(db)
+	_ = bookRepository
 	bookRepositoryMock := repository.NewBookRepositoryMock()
 	bookService := service.NewBookService(bookRepositoryMock)
 	bookHandler := handler.NewBookHandler(bookService)
