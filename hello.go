@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	// "hello/database"
+	"time"
 
 	"hello/handler"
 	"hello/repository"
@@ -15,12 +15,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-// func setupRoutes(app *fiber.App, h bookHandler) {
+// func setupRoutes(app *fiber.App) {
 // 	app.Get("/", func(c *fiber.Ctx) error {
 // 		return c.SendString("Hello, World!")
 // 	})
 
-// 	app.Get("/api/book", h.GetAll)
+// 	app.Get("/api/book", BookHandler.GetAll)
 // 	app.Get("/api/book/:id", book.GetBook)
 // 	app.Post("/api/book", book.AddBook)
 // 	app.Post("/api/book/:id", book.UpdateBook)
@@ -29,41 +29,20 @@ import (
 
 func main() {
 	initConfig()
-	// dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v",
-	// 	viper.GetString("db.username"),
-	// 	viper.GetString("db.password"),
-	// 	viper.GetString("db.hostname"),
-	// 	viper.GetInt("db.port"),
-	// 	viper.GetString("db.driver"),
-	// )
 
 	app := fiber.New()
 
-	// fmt.Println(dsn)
-	// database.ConnectDB()
-
-	db, err := sql.Open("mysql", "root:1991932@tcp(127.0.0.1:3306)/book")
-	if err != nil {
-		panic(err)
-	}
-
+	db := initDB()
 	bookRepository := repository.NewBookRepositoryDB(db)
 	bookService := service.NewBookService(bookRepository)
 	bookHandler := handler.NewBookHandler(bookService)
 
+	// setupRoutes(app, bookHandler)
 	app.Get("/api/book", bookHandler.GetAllBooks)
 	app.Get("/api/book/:id", bookHandler.GetBookById)
 	app.Post("/api/book", bookHandler.AddNewBook)
 	app.Post("/api/book/:id", bookHandler.UpdateBook)
 	app.Delete("/api/book/:id", bookHandler.DeleteBook)
-
-	// setupRoutes(app, bookHandler)
-
-	// books, err := bookService.GetBookById(2)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println(books)
 
 	app.Listen(":3000")
 }
@@ -72,5 +51,30 @@ func initConfig() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
-	fmt.Printf("Driver: %s", viper.GetString("db.driver"))
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func initDB() *sql.DB {
+	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v",
+		viper.GetString("db.username"),
+		viper.GetString("db.password"),
+		viper.GetString("db.hostname"),
+		viper.GetInt("db.port"),
+		viper.GetString("db.dbname"),
+	)
+
+	db, err := sql.Open(viper.GetString("db.driver"), dsn)
+	if err != nil {
+		panic(err)
+	}
+
+	db.SetMaxOpenConns(20)
+	db.SetMaxIdleConns(20)
+	db.SetConnMaxLifetime(time.Minute * 5)
+
+	return db
 }
