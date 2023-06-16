@@ -55,5 +55,5 @@ func (m *bookRepositoryMock) DeleteBook(id int) (string, error) {
 			return "this book ID is deleted", nil
 		}
 	}
-	return "", errors.New("this book is not exist")
+	return "This book is not exist", errors.New("this book is not exist")
 }
