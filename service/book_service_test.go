@@ -4,10 +4,39 @@ import (
 	"hello/repository"
 	"testing"
 
+	"github.com/golang/mock/gomock"
+
 	"github.com/stretchr/testify/assert"
 )
 
+type Book struct {
+	BookID      int    `json:"book_id"`
+	Name        string `json:"book_name"`
+	Description string `json:"book_desc"`
+}
+
 func TestGetAll(t *testing.T) {
+	clt := gomock.NewController(t)
+	defer clt.Finish()
+
+	mockGetAll := repository.NewMockBookRepository(clt)
+	gomock.InOrder(
+		mockGetAll.EXPECT().GetAll().Return(
+			[]Book{
+				{
+					BookID:      1,
+					Name:        "First Book",
+					Description: "Tell something about this book",
+				},
+				{
+					BookID:      2,
+					Name:        "Second Book",
+					Description: "This book is about how to cook",
+				},
+			},
+			nil),
+	)
+
 	tests := []struct {
 		name     string
 		expected []BookResponse
@@ -29,8 +58,8 @@ func TestGetAll(t *testing.T) {
 		},
 	}
 
-	bookRepo := repository.NewBookRepositoryMock()
-	bookService := NewBookService(bookRepo)
+	// bookRepo := repository.NewBookRepositoryMock()
+	bookService := NewBookService(mockGetAll)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -6,6 +6,8 @@ type Book struct {
 	Description string `json:"book_desc"`
 }
 
+//go:generate mockgen -package=repository -destination book_gomock.go . BookRepository
+
 type BookRepository interface {
 	GetAll() ([]Book, error)
 	GetById(int) (*Book, error)
