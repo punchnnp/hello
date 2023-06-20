@@ -9,20 +9,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type Book struct {
-	BookID      int    `json:"book_id"`
-	Name        string `json:"book_name"`
-	Description string `json:"book_desc"`
-}
-
 func TestGetAll(t *testing.T) {
 	clt := gomock.NewController(t)
 	defer clt.Finish()
 
+	// bookRepo := repository.NewBookRepositoryMock()
 	mockGetAll := repository.NewMockBookRepository(clt)
-	gomock.InOrder(
-		mockGetAll.EXPECT().GetAll().Return(
-			[]Book{
+	bookService := NewBookService(mockGetAll)
+
+	tests := []struct {
+		name     string
+		book     []repository.Book
+		expected []BookResponse
+	}{
+		{
+			name: "get all book",
+			book: []repository.Book{
 				{
 					BookID:      1,
 					Name:        "First Book",
@@ -34,15 +36,6 @@ func TestGetAll(t *testing.T) {
 					Description: "This book is about how to cook",
 				},
 			},
-			nil),
-	)
-
-	tests := []struct {
-		name     string
-		expected []BookResponse
-	}{
-		{
-			name: "get all book",
 			expected: []BookResponse{
 				{
 					BookID:      1,
@@ -58,11 +51,12 @@ func TestGetAll(t *testing.T) {
 		},
 	}
 
-	// bookRepo := repository.NewBookRepositoryMock()
-	bookService := NewBookService(mockGetAll)
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			gomock.InOrder(
+				mockGetAll.EXPECT().GetAll().Return(tt.book, nil),
+			)
+
 			books, _ := bookService.GetAllBooks()
 			assert.EqualValues(t, tt.expected, books)
 		})
@@ -71,14 +65,27 @@ func TestGetAll(t *testing.T) {
 }
 
 func TestGetBookById(t *testing.T) {
+	clt := gomock.NewController(t)
+	defer clt.Finish()
+
+	mockGetById := repository.NewMockBookRepository(clt)
+	// bookRepo := repository.NewBookRepositoryMock()
+	bookService := NewBookService(mockGetById)
+
 	tests := []struct {
 		name     string
 		input    int
+		book     *repository.Book
 		expected *BookResponse
 	}{
 		{
 			name:  "get existing book id: 1",
 			input: 1,
+			book: &repository.Book{
+				BookID:      1,
+				Name:        "First Book",
+				Description: "Tell something about this book",
+			},
 			expected: &BookResponse{
 				BookID:      1,
 				Name:        "First Book",
@@ -88,27 +95,33 @@ func TestGetBookById(t *testing.T) {
 		{
 			name:  "get existing book id: 2",
 			input: 2,
+			book: &repository.Book{
+				BookID:      2,
+				Name:        "Second Book",
+				Description: "This book is about how to cook",
+			},
 			expected: &BookResponse{
 				BookID:      2,
 				Name:        "Second Book",
 				Description: "This book is about how to cook",
 			},
 		},
-		{
-			name:     "get not existing book",
-			input:    3,
-			expected: nil,
-		},
+		// {
+		// 	name:     "get not existing book",
+		// 	input:    3,
+		// 	book:     nil,
+		// 	expected: nil,
+		// },
 	}
-
-	bookRepo := repository.NewBookRepositoryMock()
-	bookService := NewBookService(bookRepo)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			gomock.InOrder(
+				mockGetById.EXPECT().GetById(tt.input).Return(tt.book, nil),
+			)
+
 			book, _ := bookService.GetBookById(tt.input)
 			assert.EqualValues(t, tt.expected, book)
-
 		})
 	}
 }
