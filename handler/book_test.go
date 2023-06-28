@@ -13,6 +13,11 @@ import (
 )
 
 func TestGetAll(t *testing.T) {
+
+	bookRepositoryMock := repository.NewBookRepositoryMock()
+	bookService := service.NewBookService(bookRepositoryMock)
+	bookHandler := handler.NewBookHandler(bookService)
+
 	tests := []struct {
 		description  string
 		route        string
@@ -30,10 +35,6 @@ func TestGetAll(t *testing.T) {
 		},
 	}
 
-	bookRepositoryMock := repository.NewBookRepositoryMock()
-	bookService := service.NewBookService(bookRepositoryMock)
-	bookHandler := handler.NewBookHandler(bookService)
-
 	app := fiber.New()
 	app.Get("/api/book", bookHandler.GetAllBooks)
 
@@ -47,6 +48,11 @@ func TestGetAll(t *testing.T) {
 }
 
 func TestGetBookById(t *testing.T) {
+
+	bookRepositoryMock := repository.NewBookRepositoryMock()
+	bookService := service.NewBookService(bookRepositoryMock)
+	bookHandler := handler.NewBookHandler(bookService)
+
 	tests := []struct {
 		description  string
 		route        string
@@ -64,10 +70,6 @@ func TestGetBookById(t *testing.T) {
 		},
 	}
 
-	bookRepositoryMock := repository.NewBookRepositoryMock()
-	bookService := service.NewBookService(bookRepositoryMock)
-	bookHandler := handler.NewBookHandler(bookService)
-
 	app := fiber.New()
 	app.Get("/api/book/:id", bookHandler.GetBookById)
 
@@ -81,6 +83,11 @@ func TestGetBookById(t *testing.T) {
 }
 
 func TestAddNewBook(t *testing.T) {
+
+	bookRepositoryMock := repository.NewBookRepositoryMock()
+	bookService := service.NewBookService(bookRepositoryMock)
+	bookHandler := handler.NewBookHandler(bookService)
+
 	tests := []struct {
 		description  string
 		route        string
@@ -98,10 +105,6 @@ func TestAddNewBook(t *testing.T) {
 		},
 	}
 
-	bookRepositoryMock := repository.NewBookRepositoryMock()
-	bookService := service.NewBookService(bookRepositoryMock)
-	bookHandler := handler.NewBookHandler(bookService)
-
 	app := fiber.New()
 	app.Post("/api/book", bookHandler.AddNewBook)
 
@@ -115,6 +118,11 @@ func TestAddNewBook(t *testing.T) {
 }
 
 func TestUpdateBook(t *testing.T) {
+
+	bookRepositoryMock := repository.NewBookRepositoryMock()
+	bookService := service.NewBookService(bookRepositoryMock)
+	bookHandler := handler.NewBookHandler(bookService)
+
 	tests := []struct {
 		description  string
 		route        string
@@ -131,10 +139,6 @@ func TestUpdateBook(t *testing.T) {
 			expectedCode: 404,
 		},
 	}
-
-	bookRepositoryMock := repository.NewBookRepositoryMock()
-	bookService := service.NewBookService(bookRepositoryMock)
-	bookHandler := handler.NewBookHandler(bookService)
 
 	app := fiber.New()
 	app.Post("/api/book/:id", bookHandler.AddNewBook)
@@ -148,6 +152,11 @@ func TestUpdateBook(t *testing.T) {
 }
 
 func TestDeleteBook(t *testing.T) {
+
+	bookRepositoryMock := repository.NewBookRepositoryMock()
+	bookService := service.NewBookService(bookRepositoryMock)
+	bookHandler := handler.NewBookHandler(bookService)
+
 	tests := []struct {
 		description  string
 		route        string
@@ -164,10 +173,6 @@ func TestDeleteBook(t *testing.T) {
 			expectedCode: 404,
 		},
 	}
-
-	bookRepositoryMock := repository.NewBookRepositoryMock()
-	bookService := service.NewBookService(bookRepositoryMock)
-	bookHandler := handler.NewBookHandler(bookService)
 
 	app := fiber.New()
 	app.Delete("/api/book/:id", bookHandler.DeleteBook)

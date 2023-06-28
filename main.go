@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 
 	"database/sql"
 
+	"github.com/go-redis/redis/v8"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/viper"
@@ -17,6 +19,19 @@ import (
 
 func main() {
 	initConfig()
+
+	fmt.Println("Go Redis Tutorial")
+
+	ctx := context.Background()
+
+	client := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+
+	pong, err := client.Ping(ctx).Result()
+	fmt.Println(pong, err)
 
 	app := fiber.New()
 
