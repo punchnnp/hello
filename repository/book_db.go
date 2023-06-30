@@ -34,6 +34,7 @@ func (r bookRepositoryDB) GetAll() ([]Book, error) {
 			}
 		}
 	}
+
 	return books, nil
 }
 
